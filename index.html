@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASX 6 MONTH PROJECT</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23007FFF'/%3E%3Cpath d='M14 72 34 50 50 62 82 28' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M64 26h20v20' fill='none' stroke='%23FF7F50' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06162b; --panel:#0c2340; --panel2:#102d50; --line:#1c4068;
+  --azure:#2ea0ff; --azure-d:#007fff; --coral:#ff7f50; --text:#eaf4ff; --mute:#8fb0d1;
+  --up:var(--azure); --down:var(--coral);
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg)}
+body{
+  font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);
+  min-height:100vh;padding:28px clamp(14px,4vw,48px) 40px;font-variant-numeric:tabular-nums;
+  background:
+    radial-gradient(900px 500px at 8% -10%,rgba(0,127,255,.28),transparent 60%),
+    radial-gradient(700px 420px at 100% 0%,rgba(255,127,80,.16),transparent 60%),
+    var(--bg);
+}
+header{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}
+h1{font-size:clamp(1.5rem,3.4vw,2.3rem);font-weight:800;letter-spacing:.01em}
+h1 span{color:var(--coral)}
+.sub{color:var(--mute);font-size:.9rem;margin-top:4px}
+.pill{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:.85rem;color:var(--mute)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.dot.open{background:var(--azure);box-shadow:0 0 0 0 rgba(46,160,255,.7);animation:pulse 2s infinite}
+.dot.err{background:var(--coral)}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(46,160,255,0)}100%{box-shadow:0 0 0 0 rgba(46,160,255,0)}}
+@media(prefers-reduced-motion:reduce){.dot.open{animation:none}}
+
+#cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.card{
+  text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--panel);
+  border:1px solid var(--line);border-radius:14px;padding:14px 16px 13px;
+  border-top:3px solid transparent;transition:background .15s,border-color .15s;
+}
+.card:hover{background:var(--panel2)}
+.card:focus-visible,.rg button:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+.card.sel{background:var(--panel2);border-color:var(--azure-d);border-top-color:var(--coral)}
+.card .t{display:flex;justify-content:space-between;align-items:baseline}
+.card .sym{font-weight:800;font-size:1.05rem}
+.card .nm{color:var(--mute);font-size:.78rem}
+.card .px{font-size:1.65rem;font-weight:700;margin:10px 0 4px}
+.chg{font-size:.86rem;font-weight:700}
+.chg.up{color:var(--up)} .chg.dn{color:var(--down)}
+.card .rng{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:.8rem;color:var(--mute)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px clamp(14px,2.4vw,26px) 18px}
+.ph{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.ph .name{color:var(--mute);font-size:.92rem}
+.ph .big{font-size:clamp(2rem,5vw,3rem);font-weight:800;line-height:1.1;margin-top:2px}
+.ph .when{color:var(--mute);font-size:.82rem;min-height:1.2em;margin-top:2px}
+.rg{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:4px;flex-wrap:wrap}
+.rg button{font:inherit;font-weight:700;font-size:.84rem;color:var(--mute);background:none;border:0;border-radius:7px;padding:7px 13px;cursor:pointer}
+.rg button:hover{color:var(--text)}
+.rg button.on{background:var(--azure-d);color:#fff}
+.chartwrap{position:relative;height:clamp(260px,42vh,400px)}
+canvas{width:100%;height:100%;display:block;touch-action:pan-y}
+.msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px;font-size:.95rem}
+.msg b{color:var(--coral)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:16px}
+.stats div{background:var(--panel);padding:11px 14px}
+.stats span{display:block;color:var(--mute);font-size:.76rem;margin-bottom:3px}
+.stats b{font-size:.98rem}
+footer{color:var(--mute);font-size:.78rem;margin-top:16px;line-height:1.6;max-width:90ch}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ASX <span>6 MONTH</span> PROJECT</h1>
+    <p class="sub">Live prices for TNE, CPU, ANZ, WOW and TLS on the Australian Securities Exchange</p>
+  </div>
+  <div class="pill"><span class="dot" id="dot"></span><span id="status">Connecting…</span></div>
+</header>
+
+<section id="cards" aria-label="Companies"></section>
+
+<section class="panel">
+  <div class="ph">
+    <div>
+      <div class="name" id="pname">&nbsp;</div>
+      <div class="big" id="pbig">–</div>
+      <div class="chg" id="pchg"></div>
+      <div class="when" id="pwhen"></div>
+    </div>
+    <div class="rg" id="rg" role="group" aria-label="Time range"></div>
+  </div>
+  <div class="chartwrap">
+    <canvas id="cv"></canvas>
+    <div class="msg" id="msg">Loading prices…</div>
+  </div>
+  <div class="stats" id="stats"></div>
+</section>
+
+<footer>
+  Prices in AUD from Yahoo Finance's public market data feed, refreshed every 15 seconds while this page is open.
+  ASX quotes from this feed can run up to about 20 minutes behind the exchange, so check your broker or the ASX before you trade.
+  Not financial advice.
+</footer>
+
+<script>
+const SYMS=[['TNE','Technology One'],['CPU','Computershare'],['ANZ','ANZ Group'],['WOW','Woolworths Group'],['TLS','Telstra Group']];
+const RANGES={'1D':['1d','5m'],'5D':['5d','15m'],'1M':['1mo','1d'],'6M':['6mo','1d'],'YTD':['ytd','1d'],'1Y':['1y','1d'],'5Y':['5y','1wk']};
+const PROXY=''; // paste your Cloudflare Worker URL here, e.g. 'https://asx-prices.yourname.workers.dev'
+const $=id=>document.getElementById(id);
+let sel='TNE', range='6M', quotes={}, series={}, cur=null, hover=null, route=0;
+
+const TZ='Australia/Sydney';
+const f=(o)=>new Intl.DateTimeFormat('en-AU',{timeZone:TZ,...o});
+const fTime=f({hour:'numeric',minute:'2-digit'}), fDay=f({weekday:'short',day:'numeric',month:'short'}),
+      fDate=f({day:'numeric',month:'short',year:'numeric'}), fMon=f({month:'short',year:'2-digit'}), fClock=f({hour:'numeric',minute:'2-digit',second:'2-digit'});
+const money=v=>v==null?'–':v.toLocaleString('en-AU',{style:'currency',currency:'AUD'});
+const num=v=>v==null?'–':v.toLocaleString('en-AU');
+const pct=v=>(v>=0?'+':'')+v.toFixed(2)+'%';
+const sgn=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+
+/* ---- data ---- */
+async function yf(sym,rg,iv){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}.AX?range=${rg}&interval=${iv}&includePrePost=false`;
+  const routes=PROXY?[()=>`${PROXY}?sym=${sym}&range=${rg}&interval=${iv}`]:[u=>u,u=>u.replace('query1','query2'),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),u=>'https://corsproxy.io/?url='+encodeURIComponent(u)];
+  let last;
+  for(let k=0;k<routes.length;k++){
+    const i=(route+k)%routes.length, ac=new AbortController(), to=setTimeout(()=>ac.abort(),6000);
+    try{
+      const r=await fetch(routes[i](url),{signal:ac.signal,cache:'no-store'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const j=await r.json(), res=j.chart&&j.chart.result&&j.chart.result[0];
+      if(!res)throw new Error('No data');
+      route=i; return res;
+    }catch(e){last=e}finally{clearTimeout(to)}
+  }
+  throw last;
+}
+function parseQuote(r){
+  const m=r.meta,q=r.indicators.quote[0]||{},o=(q.open||[]).find(v=>v!=null);
+  return{price:m.regularMarketPrice,prev:m.chartPreviousClose,hi:m.regularMarketDayHigh,lo:m.regularMarketDayLow,
+    h52:m.fiftyTwoWeekHigh,l52:m.fiftyTwoWeekLow,vol:m.regularMarketVolume,time:m.regularMarketTime,open:o,reg:m.currentTradingPeriod&&m.currentTradingPeriod.regular};
+}
+async function loadQuotes(){
+  let ok=0;
+  await Promise.all(SYMS.map(async([s])=>{try{quotes[s]=parseQuote(await yf(s,'1d','5m'));ok++}catch(e){}}));
+  const live=Object.values(quotes).find(q=>q.reg), now=Date.now()/1000;
+  const open=live&&now>=live.reg.start&&now<=live.reg.end;
+  $('dot').className='dot '+(ok?(open?'open':''):'err');
+  $('status').textContent=ok?`${open?'Market open':'Market closed'} · updated ${fClock.format(new Date())}`:'Cannot reach the price feed';
+  renderCards(); renderHeader(); renderStats();
+  if(!ok&&!cur)showMsg('<span><b>Couldn’t load prices.</b><br>Check your internet connection, then reload. Browser extensions that block requests can also stop the feed.</span>');
+}
+async function loadSeries(sym,rg,force){
+  const key=sym+rg, c=series[key], ttl=rg==='1D'?14000:120000;
+  if(c&&!force&&Date.now()-c.at<ttl)return c;
+  const r=await yf(sym,RANGES[rg][0],RANGES[rg][1]), t=r.timestamp||[], cl=r.indicators.quote[0].close||[], T=[],C=[];
+  t.forEach((x,i)=>{if(cl[i]!=null){T.push(x);C.push(cl[i])}});
+  return series[key]={at:Date.now(),t:T,c:C};
+}
+async function loadRange(force){
+  const mine=sel+range;
+  SYMS.forEach(([s])=>loadSeries(s,range,force).then(renderCards).catch(()=>{}));
+  try{
+    const s=await loadSeries(sel,range,force);
+    if(mine!==sel+range)return;
+    cur=s; hideMsg(); draw(); renderHeader();
+  }catch(e){ if(!cur)showMsg('<span><b>Couldn’t load this chart.</b><br>Try another range or reload the page.</span>') }
+}
+
+/* ---- ui ---- */
+function showMsg(h){$('msg').innerHTML=h;$('msg').style.display='grid'}
+function hideMsg(){$('msg').style.display='none'}
+function renderCards(){
+  $('cards').innerHTML=SYMS.map(([s,n])=>{
+    const q=quotes[s], sr=series[s+range], d=q&&q.prev?q.price-q.prev:null, dp=d!=null?d/q.prev*100:null;
+    const rp=sr&&sr.c.length>1?(sr.c[sr.c.length-1]/sr.c[0]-1)*100:null;
+    return `<button class="card ${s===sel?'sel':''}" data-s="${s}" aria-pressed="${s===sel}">
+      <div class="t"><span class="sym">${s}</span><span class="nm">${n}</span></div>
+      <div class="px">${q?money(q.price):'…'}</div>
+      <div class="chg ${d==null?'':d>=0?'up':'dn'}">${d==null?'':sgn(d)+' ('+pct(dp)+') today'}</div>
+      <div class="rng"><span>${range}</span><span class="chg ${rp==null?'':rp>=0?'up':'dn'}">${rp==null?'…':pct(rp)}</span></div></button>`}).join('');
+}
+function renderHeader(){
+  const name=SYMS.find(x=>x[0]===sel)[1], q=quotes[sel];
+  $('pname').textContent=`${name} (ASX: ${sel})`;
+  const n=cur&&cur.c.length, i=hover!=null&&cur?hover:(n?n-1:null);
+  let price=i!=null?cur.c[i]:q&&q.price, when='';
+  if(i!=null){
+    const ts=cur.t[i]*1000; when=(range==='1D'||range==='5D'?fDay.format(ts)+', '+fTime.format(ts):fDate.format(ts));
+    if(hover==null&&q&&range==='1D'&&q.price!=null)price=q.price;
+  }
+  $('pbig').textContent=price!=null?money(price):'–';
+  const base=cur&&cur.c.length?cur.c[0]:null;
+  if(price!=null&&base){const d=price-base;$('pchg').className='chg '+(d>=0?'up':'dn');$('pchg').textContent=`${sgn(d)} (${pct(d/base*100)}) over ${range}`}
+  $('pwhen').textContent=when;
+}
+function renderStats(){
+  const q=quotes[sel]; if(!q){$('stats').innerHTML='';return}
+  const it=[['Open',money(q.open)],['Previous close',money(q.prev)],['Day high',money(q.hi)],['Day low',money(q.lo)],['52-week high',money(q.h52)],['52-week low',money(q.l52)],['Volume',num(q.vol)]];
+  $('stats').innerHTML=it.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('');
+}
+
+/* ---- chart ---- */
+function draw(){
+  const cv=$('cv'),ctx=cv.getContext('2d'),W=cv.clientWidth,H=cv.clientHeight,d=window.devicePixelRatio||1;
+  cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,W,H);
+  if(!cur||cur.c.length<2)return;
+  const c=cur.c,t=cur.t,n=c.length,P={l:6,r:62,t:10,b:26};
+  let lo=Math.min(...c),hi=Math.max(...c);const pad=(hi-lo||hi*.02)*.08;lo-=pad;hi+=pad;
+  const X=i=>P.l+(W-P.l-P.r)*i/(n-1),Y=v=>P.t+(H-P.t-P.b)*(1-(v-lo)/(hi-lo));
+  const up=c[n-1]>=c[0],col=up?'#2ea0ff':'#ff7f50';
+  ctx.font='12px Manrope,system-ui,sans-serif';ctx.fillStyle='#8fb0d1';ctx.strokeStyle='rgba(143,176,209,.16)';ctx.lineWidth=1;
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  for(let k=0;k<5;k++){const v=lo+(hi-lo)*k/4,y=Y(v);ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();ctx.fillText(v.toFixed(2),W-P.r+8,y)}
+  ctx.textBaseline='top';const lab=i=>{const ts=t[i]*1000;return range==='1D'?fTime.format(ts):range==='5D'?fDay.format(ts):range==='5Y'||range==='1Y'?fMon.format(ts):f({day:'numeric',month:'short'}).format(ts)};
+  const cnt=W<520?3:5;for(let k=0;k<cnt;k++){const i=Math.round((n-1)*k/(cnt-1));ctx.textAlign=k===0?'left':k===cnt-1?'right':'center';ctx.fillText(lab(i),X(i)+(k===0?0:k===cnt-1?(P.r-4):0),H-P.b+8)}
+  const g=ctx.createLinearGradient(0,P.t,0,H-P.b);g.addColorStop(0,col+'55');g.addColorStop(1,col+'00');
+  ctx.beginPath();c.forEach((v,i)=>i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));
+  ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.stroke();
+  ctx.lineTo(X(n-1),H-P.b);ctx.lineTo(X(0),H-P.b);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  const ly=Y(c[n-1]);ctx.setLineDash([3,4]);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.l,ly);ctx.lineTo(W-P.r,ly);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=col;ctx.fillRect(W-P.r+2,ly-10,P.r-2,20);ctx.fillStyle='#04101f';ctx.textAlign='left';ctx.textBaseline='middle';ctx.font='700 12px Manrope,system-ui,sans-serif';ctx.fillText(c[n-1].toFixed(2),W-P.r+8,ly);
+  if(hover!=null){const x=X(hover),y=Y(c[hover]);ctx.strokeStyle='rgba(234,244,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,H-P.b);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();ctx.stroke()}
+}
+function move(e){
+  if(!cur)return;const r=$('cv').getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-r.left,n=cur.c.length,l=6,w=r.width-6-62;
+  hover=Math.max(0,Math.min(n-1,Math.round((x-l)/w*(n-1))));draw();renderHeader();
+}
+function leave(){hover=null;draw();renderHeader()}
+
+/* ---- wiring ---- */
+$('rg').innerHTML=Object.keys(RANGES).map(r=>`<button data-r="${r}" class="${r===range?'on':''}">${r}</button>`).join('');
+$('rg').onclick=e=>{const b=e.target.closest('button');if(!b)return;range=b.dataset.r;hover=null;
+  [...$('rg').children].forEach(x=>x.classList.toggle('on',x===b));renderCards();loadRange()};
+$('cards').onclick=e=>{const b=e.target.closest('.card');if(!b||b.dataset.s===sel)return;sel=b.dataset.s;cur=null;hover=null;
+  showMsg('Loading prices…');renderCards();renderHeader();renderStats();loadRange()};
+const cv=$('cv');cv.addEventListener('mousemove',move);cv.addEventListener('touchmove',move,{passive:true});
+cv.addEventListener('mouseleave',leave);cv.addEventListener('touchend',leave);
+addEventListener('resize',draw);
+
+renderCards();
+loadQuotes().then(()=>loadRange());
+setInterval(()=>{loadQuotes();if(range==='1D')loadRange(true)},15000);
+</script>
+</body>
+</html>
